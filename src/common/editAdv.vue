@@ -533,8 +533,7 @@ export default {
       timer = setInterval(() => {
         time += 2;
         //设置类型 类型 0-图文 2-图文草稿  1-视频 3-视频草稿
-        if (this.detailList.type == 0 || this.detailList.type == 2) {
-          console.log("图片");
+        if (this.detailList.type == 0 || this.detailList.type == 2) {//图文广告
           if (
             this.detailList.advertisImgVOS[advConLen - 1].advImg &&
             this.detailList.masterImg
@@ -544,7 +543,7 @@ export default {
             this.loading.close(); //关闭加载提示
             this.senEditAdv();
           }
-        } else {
+        } else {//视频广告
           console.log(this.detailList.type);
           console.log("shipin");
           if (this.detailList.video) {
