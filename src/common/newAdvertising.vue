@@ -215,8 +215,9 @@
               style="width: 180px;height:36px;"
               :placeholder="'不低于'+advLimits.advertisRestrictVO.minissueSingle +'个'"
               v-model="detailList.issueSingle"
-            />个/天
+            /><span style="margin-left: 10px;">个/天</span>
           </el-form-item>
+          
         </div>
 
         <div class="fromList">
@@ -243,10 +244,10 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="isOnlineShop" required label="商城链接">
+          <el-form-item v-if="isOnlineShop" required label="商品链接">
             <el-input
               style="width: 360px;height:36px;"
-              placeholder="请输入您的商铺链接"
+              placeholder="请输入您的商品链接"
               v-model="detailList.url"
             />
           </el-form-item>
@@ -264,14 +265,23 @@
             <span class="blueNum">5</span>
             <span>投放红包总数</span>
           </div>
-          <el-form-item required label="投放红包">
+          <el-form-item v-if="toNewAdvProps.type==0" required label="投放红包">
             <el-input
               style="width:220px;"
               type="number"
               min="1000"
               :placeholder="'不低于'+advLimits.advertisRestrictVO.imgPrice"
               v-model="detailList.totalPrice"
-            />个
+            /><span style="margin-left: 10px;">个</span>
+          </el-form-item>
+          <el-form-item v-else required label="投放红包">
+            <el-input
+              style="width:220px;"
+              type="number"
+              min="1000"
+              :placeholder="'不低于'+advLimits.advertisRestrictVO.videoPrice"
+              v-model="detailList.totalPrice"
+            /><span style="margin-left: 10px;">个</span>
           </el-form-item>
           <div style="margin-bottom:120px;"></div>
         </div>
@@ -434,10 +444,9 @@ export default {
     //视频上传得到URL
     getMyEvent(vid) {
       this.detailList.video = vid.url;
-
       console.log(vid);
       this.detailList.second = vid.duration;
-      this.detailList.videoFrame = vid.firstImg;
+      this.detailList.videoFrame = vid.firstImg.name;
     },
 
     //判断线上还是线下的店铺
@@ -579,6 +588,14 @@ export default {
      * **************提交并发布**********************
      */
     saveAdv() {
+      // this.$refs.childVod.authUpload();
+      //  显示加载组件
+      this.loading = Loading.service({
+        lock: true,
+        text: "Loading",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
       //判断 必填内容是否为空
       if (this.contentJudgment()) {
         //设置类型 类型 0-图文 2-图文草稿  1-视频 3-视频草稿
@@ -591,6 +608,13 @@ export default {
      * **************存为草稿**********************
      */
     saveDraft() {
+       //显示加载组件
+      this.loading = Loading.service({
+        lock: true,
+        text: "Loading",
+        spinner: "el-icon-loading",
+        background: "rgba(0, 0, 0, 0.7)"
+      });
       //判断 必填内容是否为空
       if (this.contentJudgment()) {
         //设置类型 类型 0-图文 2-图文草稿  1-视频 3-视频草稿
@@ -605,14 +629,6 @@ export default {
 
     /*********提交前处理梳理数据******/
     handleData() {
-      //显示加载组件
-      this.loading = Loading.service({
-        lock: true,
-        text: "Loading",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)"
-      });
-
       if (this.detailList.type == 0 || this.detailList.type == 2) {
         //上传图片，拿地址
         this.$refs.uploadMasterImg.submitUpload();
@@ -722,7 +738,7 @@ export default {
       advLimit().then(res => {
         if (res.data.code == "0000") {
           this.advLimits = res.data.data;
-          // console.log(this.advLimits);
+          console.log(this.advLimits);
           this.detailList.startissueTime = this.advLimits.advertisRestrictVO.startissueTime.toString();
           this.detailList.endissueTime = this.advLimits.advertisRestrictVO.endissueTime.toString();
         } else {
@@ -909,7 +925,7 @@ export default {
 .footer .leftBtn {
   margin-right: 40px;
   color: #fff;
-  background-color: var(--color-tint);
+  background-color: #ffa800;
   border: none;
 }
 .citys {

@@ -36,7 +36,6 @@
         <el-form-item style="width:100%;">
           <el-button
             :disabled="isDisable1"
-            
             style="width:100%;background-color:#FFA800;color:#fff;"
             @click.native.prevent="handleSubmit1"
             :loading="logining"
@@ -80,8 +79,7 @@
         <el-form-item style="width:100%;">
           <el-button
             :disabled="isDisable2"
-            
-           style="width:100%;background-color:#FFA800;color:#fff;"
+            style="width:100%;background-color:#FFA800;color:#fff;"
             @click.native.prevent="handleSubmit2"
             :loading="logining"
           >登录</el-button>
@@ -95,7 +93,11 @@
       <div class="quickLogon">
         <div class="quickLogonWorlds">快速登陆</div>
         <div class="imgIcons">
-          <img @click="wechatLogin" src="../assets/img/login_weixin_click_icon@3x.png" alt />
+          <a
+            href="https://open.weixin.qq.com/connect/qrconnect?appid=wx4792cd11152da182&redirect_uri=http%3A%2F%2Fwww.showlovecode.com&response_type=code&scope=snsapi_login"
+          >
+            <img src="../assets/img/login_weixin_click_icon@3x.png" alt />
+          </a>
         </div>
       </div>
     </div>
@@ -103,7 +105,12 @@
 </template>
 
 <script>
-import { phoneLogin, passWordLogin, sendSms } from "../network/login";
+import {
+  phoneLogin,
+  passWordLogin,
+  sendSms,
+  wechatLogin
+} from "../network/login";
 import { getMenuList } from "../network/home";
 
 import { Decrypt, Encrypt } from "../util/crypto.js";
@@ -116,15 +123,24 @@ export default {
       loginStatus: false,
       logining: false,
       ruleForm1: {
-        accounts: "18688631026",
-        password: "12345678"
+        accounts: "",
+        password: ""
       },
       ruleForm2: {
-        phone: 13480087973,
-        code: 111111
+        phone: "",
+        code: ""
       },
       checked: true
     };
+  },
+  created() {
+    //判断url 是否有参数传过来，有就自动登陆
+    let urlSearch = this.getRequest();
+    let data = { code: urlSearch.code };
+    // console.log(data);
+    if (data.code) {
+      this.getWechatLogin(data);
+    }
   },
   computed: {
     isDisable1() {
@@ -140,29 +156,58 @@ export default {
     }
   },
   methods: {
-    wechatLogin() {
-      window.WwLogin({
+    //微信快速登陆
+    getWechatLogin(code) {
+      wechatLogin(code).then(res => {
+        console.log(res);
+        if (res.data.code == "0000") {
+          //登陆成功
+          this.logining = false;
+          //设置Vuex登录标志为true，默认userLogin为false
+          this.$store.commit("userLogin", true);
+          this.$store.commit("saveUserInfo", res.data.data);
 
-        "id" : "wx_reg", 
+          //Vuex在用户刷新的时候userLogin会回到默认值false，所以我们需要用到HTML5储存
+          //我们设置一个名为Flag，值为isLogin的字段，作用是如果Flag有值且为isLogin的时候，证明用户已经登录了。
+          localStorage.setItem("Flag", "isLogin");
 
-        "appid" : "",
-
-        "agentid" : "",
-
-        "redirect_uri" :"",
-
-        "state" : "",
-
-        "href" : "",
-
-});
-
-
-// 链接：https://www.jianshu.com/p/1439ca18089f
-// https://www.cnblogs.com/yzw23333/p/8036765.html
-
+          //友好提示
+          this.$message({
+            message: "登陆成功",
+            type: "success"
+          });
+          //登录成功后跳转到指定页面
+          this.$router.push({ path: "/index" });
+          //网络请求   菜单列表
+          getMenuList().then(res => {
+            console.log(res);
+            if (res.data.code == "0000") {
+              this.$store.commit("saveMenuList", res.data.data);
+            } else {
+              //登陆失败
+              this.$message.error(res.data.msg);
+            }
+          });
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
     },
-// aes 加密 用户密码
+    //获取url传过来的参数
+    getRequest() {
+      var url = location.search; //获取url中"?"符后的字串
+      var theRequest = new Object();
+      if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        var strs = str.split("&");
+        for (var i = 0; i < strs.length; i++) {
+          theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+        }
+      }
+      return theRequest;
+    },
+
+    // aes 加密 用户密码
     handleSubmit1() {
       let params = {
         phone: this.ruleForm1.accounts,
@@ -196,7 +241,6 @@ export default {
         //设置Vuex登录标志为true，默认userLogin为false
         this.$store.commit("userLogin", true);
         this.$store.commit("saveUserInfo", res.data.data);
-        
 
         //Vuex在用户刷新的时候userLogin会回到默认值false，所以我们需要用到HTML5储存
         //我们设置一个名为Flag，值为isLogin的字段，作用是如果Flag有值且为isLogin的时候，证明用户已经登录了。
@@ -208,13 +252,12 @@ export default {
           type: "success"
         });
         //登录成功后跳转到指定页面
-            this.$router.push({ path: "/index" });
+        this.$router.push({ path: "/index" });
         //网络请求   菜单列表
         getMenuList().then(res => {
-          console.log(res)
+          console.log(res);
           if (res.data.code == "0000") {
             this.$store.commit("saveMenuList", res.data.data);
-            
           } else {
             //登陆失败
             this.$message.error(res.data.msg);

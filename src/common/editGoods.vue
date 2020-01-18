@@ -116,7 +116,7 @@
             </div>
           </el-form-item>
 
-          <el-form-item label="承诺">
+          <!-- <el-form-item label="承诺">
             <div class="radios" @click="changeReason">
               <img v-if="!goodsList.reason" src="../assets/img/selection_default_icon.png" alt />
               <img v-else src="../assets/img/selection_icon.png" alt />7天无理退换
@@ -131,7 +131,7 @@
               <img v-if="!goodsList.refund" src="../assets/img/selection_default_icon.png" alt />
               <img v-else src="../assets/img/selection_icon.png" alt />极速退款
             </div>
-          </el-form-item>
+          </el-form-item> -->
         </div>
 
         <div class="fromList">
@@ -641,7 +641,7 @@ export default {
 .explain {
   font-size: 12px;
   margin: 0 0 30px 120px;
-  color: var(--color-high-text);
+  color: #666;
 }
 .collapseItem {
   white-space: nowrap;

@@ -355,7 +355,7 @@ export default {
   margin: 30px 0;
 }
 .fromTitle .blueNum {
-  color: var(--color-tint);
+  color: #ffa800;
   font-size: 28px;
   padding-right: 20px;
 }
@@ -384,7 +384,7 @@ export default {
 .addShopBtn {
   margin-top: 30px;
   background-color: #e6e6e6;
-  color: var(--color-tint);
+  color: #ffa800;
   font-size: 14px;
   border: none;
   box-sizing: border-box;
@@ -397,17 +397,17 @@ export default {
   top: 6px;
   right: -100px;
   font-size: 16px;
-  color: var(--color-tint);
+  color: #ffa800;
   border: none;
 }
 .explain {
   font-size: 12px;
   margin: 0 0 30px 120px;
-  color: var(--color-high-text);
+  color: #ff5777;
 }
 .leftBtn {
   color: #fff;
-  background-color: var(--color-tint);
+  background-color: #ffa800;
   border: none;
 }
 </style>

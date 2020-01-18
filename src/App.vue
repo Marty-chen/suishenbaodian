@@ -9,25 +9,30 @@
           class="navMenu"
           text-color="#666"
           active-text-color="#FFA800"
-          style="border:none;"
-          
+          style="border:none;padding-top:66px;"
         >
-          <el-submenu :index="(index+1).toString()" v-for="(item,index) in menuList" :key="index">
+          <el-submenu
+            :index="(index + 1).toString()"
+            v-for="(item, index) in menuList"
+            :key="index"
+          >
             <template slot="title">
-              <div @click="handleMenuTitleClick(item.url)" style="font-size:18px">
-                <i class="el-icon-message" style="marginLeft:30px;font-size:25px"></i>
-                {{item.name}}
+              <div
+                @click="handleMenuTitleClick(item.url)"
+                style="font-size:18px;padding-left:60px;"
+              >
+                <!-- <i class="el-icon-message" style="marginLeft:30px;font-size:25px"></i> -->
+                {{ item.name }}
               </div>
             </template>
             <el-menu-item-group>
               <el-menu-item
-                style="background-color:#fff;font-size:16px;"
+                style="background-color:#fff;font-size:16px;padding-left: 60px;"
                 :index="list.url"
-                v-for="(list,i) in item.children"
+                v-for="(list, i) in item.children"
                 :key="i"
-
               >
-                <div class="menuItem">{{list.name}}</div>
+                <div class="menuItem">{{ list.name }}</div>
               </el-menu-item>
             </el-menu-item-group>
           </el-submenu>
@@ -86,16 +91,24 @@ export default {
 <style>
 @import "assets/css/base.css";
 
-.el-radio__input.is-checked .el-radio__inner {
-  border-color: #FFA800;
-    background: #FFA800;
+.el-submenu__title:hover {
+  background-color: #ffa800 !important;
 }
-
+.el-menu-item:focus,
+.el-menu-item:hover {
+  background-color: #fff !important;
+}
+.el-submenu__icon-arrow.el-icon-arrow-down {
+  display: none;
+}
+/* .el-radio__input.is-checked .el-radio__inner {
+  border-color: #ffa800;
+  background: #ffa800;
+} */
 /* 禁止textarea拖动大小 */
 .el-textarea .el-textarea__inner {
   resize: none;
 }
-
 /* input 关于不显示上下箭头 */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -104,12 +117,13 @@ input::-webkit-inner-spin-button {
 input[type="number"] {
   -moz-appearance: textfield;
 }
-element.style:hover{
-
-background-color: #fff !important;
+element.style:hover {
+  background-color: #fff !important;
+  text-align: center;
 }
 
-.el-menu-item, .el-submenu__title {
+.el-menu-item,
+.el-submenu__title {
   height: 60px;
 }
 .el-submenu .el-menu-item {
@@ -126,14 +140,13 @@ background-color: #fff !important;
   left: 0;
   bottom: 0;
   right: 0;
-  
 }
 /* 去掉滚动条 */
 /* .el-aside::-webkit-scrollbar {
   display: none;
 } */
 .el-main {
-  background-color: #F7F7F7;
+  background-color: #f7f7f7;
   position: absolute;
   top: 62px;
   left: 280px;
@@ -150,42 +163,5 @@ background-color: #fff !important;
 
 .menuItem {
   padding-left: 45px;
-
-  /* width: 280px; */
 }
-
-/* .nav {
-  width: 100%;
-  margin-top: 35px;
-}
-
-.nav .navItem {
-  height: 75px;
-  font-size: 16px;
-  color: #fff;
-  padding-left: 55px;
-  display: flex;
-  align-items: center;
-}
-.active {
-  background-color: #1c5b9b;
-}
-
-.nav .navItem img {
-  width: 24px;
-  height: 24px;
-  margin-right: 12px;
-  vertical-align: middle;
-}
-.nav .navItem .arrow {
-  width: 11px;
-  height: 19px;
-  position: absolute;
-  right: -13px;
-  display: none;
-}
-
-.nav .navItem.active .arrow {
-  display: inline-block;
-} */
 </style>

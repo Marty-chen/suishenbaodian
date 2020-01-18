@@ -3,80 +3,91 @@
     <elHeader />
     <div class="wraper">
       <div class="content">
-        <el-button @click="toHome('/wallet/topup')" class="ExitBtn">退出充值</el-button>
-
+        <el-button @click="toHome('/wallet/topup')" class="ExitBtn"
+          >退出充值</el-button
+        >
         <div class="steps">
           <div class="imgs">
             <div class="stepImg img1">
               <img src="../assets/img/blue_arrow1_icon.png" alt />
             </div>
             <div class="stepImg img2">
-              <img v-if="stepStatus==2||stepStatus==3" src="../assets/img/blue_arrow2_icon.png" alt />
+              <img
+                v-if="stepStatus == 2 || stepStatus == 3"
+                src="../assets/img/blue_arrow2_icon.png"
+                alt
+              />
               <img v-else src="../assets/img/gray_arrow1_icon.png" alt />
             </div>
             <div class="stepImg img3">
-              <img v-if="stepStatus==3" src="../assets/img/blue_arrow3_icon.png" alt />
+              <img
+                v-if="stepStatus == 3"
+                src="../assets/img/blue_arrow3_icon.png"
+                alt
+              />
               <img v-else src="../assets/img/gray_arrow2_icon.png" alt />
             </div>
           </div>
         </div>
 
         <div class="payWindow">
-          <div v-if="stepStatus==1" class="step1">
+          <div v-if="stepStatus == 1" class="step1">
             <div class="chooseMoney">
               <div class="leftWords">充值金额</div>
               <div class="btns">
                 <div
                   @click="moneyClick(index)"
                   class="btnItems"
-                  :class="{active:currentIndex==index}"
-                  v-for="(item,index) in moneyList"
+                  :class="{ active: currentIndex == index }"
+                  v-for="(item, index) in moneyList"
                   :key="index"
-                >{{item.price}}元</div>
-                <!-- <el-input
-                  type="number"
-                  @focus="focus"
-                  @blur="blur"
-                  style="width:220px;height:36px;display:inline-block;"
-                  placeholder="请输入1000的整数"
-                  v-model="inputValue"
-                />-->
+                >
+                  <p style="fontSize:18px;">{{ item.totheAccount }}个</p>
+                  <p style="color:#999;fontSize:14px;">
+                    售价{{ item.price }}元
+                  </p>
+                </div>
               </div>
             </div>
             <div class="leftWords mt30">
               支付金额
-              <span class="redMoney">￥{{selectPrice}} 元</span>
+              <span class="redMoney">￥{{ selectPrice }} 元</span>
             </div>
             <div>
               <el-button @click="toStep2" class="payBtn">开始充值</el-button>
             </div>
           </div>
 
-          <div v-if="stepStatus==2" class="step2">
+          <div v-if="stepStatus == 2" class="step2">
             <div class="moneyInfo">
               支付金额
-              <span>￥{{selectPrice}}元</span>
+              <span>￥{{ selectPrice }}</span> &nbsp;元
               <div class="explain" style="color:#666;margin-top:30px">
-                订单已
-                <span style="color:#333; fontSize:18px;margin:0;"></span>生成，请您尽快付款！
+                订单已于
+                <span style="color:#333; fontSize:18px;margin:0 10px;">{{
+                  nowDate
+                }}</span
+                >生成，请您尽快付款！
               </div>
             </div>
             <div class="payment">
               <div class="paymentLeft">支付方式</div>
               <div class="payChoice">
-                <div class="paymentMethod" :class="{active:radio==1}">
+                <div class="paymentMethod" :class="{ active: radio == 1 }">
                   <el-radio class="radio" v-model="radio" label="1">
                     <img src="../assets/img/wechat_icon.png" />
                     <span>微信支付</span>
                   </el-radio>
                 </div>
-                <div class="paymentMethod" :class="{active:radio==2}">
+                <div class="paymentMethod" :class="{ active: radio == 2 }">
                   <el-radio class="radio" v-model="radio" label="2">
                     <img src="../assets/img/pay_treasure_icon.png" />
                     <span>支付宝支付</span>
                   </el-radio>
                 </div>
-                <el-button @click="toStep3" class="paymentBtn">确认支付</el-button>
+                <el-button @click="toStep3" class="paymentBtn"
+                  >确认支付</el-button
+                >
               </div>
             </div>
             <el-dialog
@@ -86,27 +97,35 @@
               :visible.sync="dialogVisible"
               :before-close="handleClose"
               class="dialog"
+              :destroy-on-close="true"
             >
-            <div style="margin-top:60px"></div>
-            <p style="fontSize:26px">请用微信扫码支付</p>
-              <img :src="weChatImg" alt />
-            <div>
-              <el-button@click="payDone" class="dialogbBtn">支付完成点击返回</el-button@click="payDone">
-            </div>
-            <div style="margin-top:70px"></div>
+              <div style="margin-top:60px"></div>
+              <p style="fontSize:26px">请用微信扫码支付</p>
+              <!-- <img :src="weChatImg" alt /> -->
+              <div id="qrcode" ref="qrcode" class="qrcode"></div>
+              <div>
+                <button @click="payDone" class="dialogbBtn"
+                  >支付完成点击返回查询余额</button
+                >
+              </div>
+              <div style="margin-top:70px"></div>
             </el-dialog>
           </div>
 
-          <div v-if="stepStatus==3" class="step3">
+          <!-- <div v-if="stepStatus == 3" class="step3">
             <div class="succes">
               <img src="../assets/img/pass_through_icon.png" alt />
               <div class="msg">您已支付成功，赶快去发布一条广告吧！</div>
               <div class="goBackBtns">
-                <el-button @click="toHome('/wallet/topup')" class="goBack">返回</el-button>
-                <el-button @click="toHome('/adv/list')" class="addAdver">添加广告</el-button>
+                <el-button @click="toHome('/wallet/topup')" class="goBack"
+                  >返回</el-button
+                >
+                <el-button @click="toHome('/adv/list')" class="addAdver"
+                  >添加广告</el-button
+                >
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -122,6 +141,9 @@ import {
 } from "../network/wallet.js";
 import { md5, aes } from "../util/signCrypto.js";
 import { Loading, Message } from "element-ui";
+import { dateFormat } from "../util/dateFormat.js";
+import QRCode from "qrcodejs2";
+
 export default {
   components: {
     elHeader
@@ -137,20 +159,30 @@ export default {
       dialogVisible: false,
       aliHtml: "",
       loading: "",
-      weChatImg: ""
+      weChatImg: "",
+      weChatPayResultCode: ''
+      
     };
   },
   methods: {
     //关闭支付弹框
     handleClose(done) {
-      this.$confirm('确认关闭？')
-          .then(_ => {
-            done();
-          })
-          .catch(_ => {});
+      this.$confirm("确认关闭？")
+        .then(_ => {
+          done();
+          // this.$router.push({path: ''})
+        })
+        .catch(_ => {});
     },
     //支付完成返回页面判断状态
     payDone() {
+
+      this.$router.push({
+        path: "/wallet/payResult",
+        query: {
+          code: this.weChatPayResultCode
+        }
+      });
       this.dialogVisible = false;
     },
     //退出充值
@@ -163,15 +195,8 @@ export default {
     moneyClick(index) {
       this.currentIndex = index;
     },
-    focus() {
-      this.currentIndex = null;
-    },
-    blur() {
-      if (this.inputValue) {
-        this.money = this.inputValue;
-        this.inputValue = "";
-      }
-    },
+
+
     toStep2() {
       this.stepStatus = 2;
     },
@@ -206,7 +231,7 @@ export default {
         this.weChatPay(weChatData, header);
       }
 
-      // this.stepStatus = 3;
+
     },
     //支付宝支付
     aliPay(id, header) {
@@ -229,28 +254,55 @@ export default {
     //微信支付
     weChatPay(id, header) {
       this.dialogVisible = true;
-     let img = weChatOrderIsPc(id, header).then(res => {
-        console.log(res);
-        this.loading.close(); //关闭加载提示
-        if (res.status == "200") {
-          return (
-            "data:image/png;base64," +
-            btoa(
-              new Uint8Array(res.data).reduce(
-                (data, byte) => data + String.fromCharCode(byte),
-                ""
-              )
-            )
-          );
+      //自己拿链接生成二维码
+      let that = this;
+      weChatOrderIsPc(id, header).then(res=>{
+         this.loading.close(); //关闭加载提示
+         console.log(res)
+        if (res.data.code == "0000") {
+          this.weChatPayResultCode = res.data.data.code;
+          // console.log(this.weChatPayResultCode)
+          let url = res.data.data.code_url;
+          that.$nextTick(() => {
+           let img = that.qrcode(url);
+         });
         } else {
-          this.$message.error("请求错误");
+          this.$message.error(res.data.msg);
         }
-      });
-      img.then(body=>{
-        this.weChatImg = body;
-        // console.log(body)
       })
+
+      /*******接收文件流格式，直接从后台拿到二维码****/
+      // responseType: 'arraybuffer' //请求类型要添加这一行
+      // let img = weChatOrderIsPc(id, header).then(res => {
+      //   console.log(res);
+      //   this.loading.close(); //关闭加载提示
+      //   if (res.status == "200") {
+      //     return (
+      //       "data:image/png;base64," +
+      //       btoa(
+      //         new Uint8Array(res.data).reduce(
+      //           (data, byte) => data + String.fromCharCode(byte),
+      //           ""
+      //         )
+      //       )
+      //     );
+      //   } else {
+      //     this.$message.error("请求错误");
+      //   }
+      // });
+      // img.then(body => {
+      //   this.weChatImg = body;
+      //   // console.log(body)
+      // });
     },
+    qrcode(url) {
+      let qrcode = new QRCode("qrcode", {
+        width: 200, // 二维码宽度，单位像素
+        height: 200, // 二维码高度，单位像素
+        text: url // 生成二维码的链接
+        });
+      },
+
     //网络请求
     getPaket() {
       let type = { type: 0 };
@@ -271,6 +323,9 @@ export default {
   computed: {
     selectPrice() {
       return this.moneyList[this.currentIndex].price;
+    },
+    nowDate() {
+      return dateFormat("YYYY-mm-dd HH:MM", new Date());
     }
   }
 };
@@ -357,12 +412,11 @@ export default {
 }
 .btns .btnItems {
   display: inline-block;
-  width: 100px;
-  height: 36px;
+  padding: 10px 25px;
   color: #333;
   border: 1px solid #ccc;
   text-align: center;
-  line-height: 36px;
+  line-height: 25px;
   margin-right: 20px;
   margin-bottom: 20px;
   vertical-align: middle;
@@ -477,7 +531,15 @@ export default {
 }
 .dialogbBtn {
   color: #fff;
-  background-color: var(--color-tint);
+  background-color: #ffa800;
   margin-top: 70px;
+  border: none;
+  padding: 12px 15px;
+  border-radius: 4px;
+  font-size: 16px;
+}
+.qrcode {
+  margin-top: 70px;
+  display: inline-block;
 }
 </style>

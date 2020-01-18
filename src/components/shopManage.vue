@@ -250,6 +250,9 @@ export default {
 </script>
 
 <style scoped>
+.wrap{
+  min-width: 800px;
+}
 .el-table {
   font-size: 16px;
   color: #666;
@@ -272,6 +275,7 @@ export default {
 }
 .tabCtrl {
   min-width: 700px;
+  color: #999;
 }
 .tabItem {
   display: inline-block;

@@ -57,7 +57,7 @@
 
           <div v-else>
             <el-form-item required label="视频广告">
-              <uploadVod @my-event="getMyEvent" :videoFristImg="videoFristImg" ref="childVod" />
+              <uploadVod @my-event="getMyEvent" @deleVideo="deleVideo" :videoFristImg="videoFristImg" ref="childVod" />
             </el-form-item>
           </div>
         </div>
@@ -78,7 +78,7 @@
             <el-button
               @click="addTag"
               :disabled="!inputTag.length || detailList.tags.length==3"
-              style="margin-left:10px;color:#fff; background-color:var(--color-tint)"
+              style="margin-left:10px;color:#fff; background-color:#ffa800;"
             >确定</el-button>
             <div class="tags">
               <el-tag
@@ -182,6 +182,47 @@
               <el-button class="addShopBtn" @click="addCityBtn" size="small">+ 添加地域</el-button>
             </el-form-item>
           </el-form-item>
+           <el-form-item required label="发放时段">
+            <el-select
+              v-model="detailList.startissueTime"
+              style="width:180px;margin-right:20px;"
+              placeholder="开始时间"
+            >
+              <el-option
+                v-for="item in startTime"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+                <span style="float: left">{{ item.label }}</span>
+                <!-- <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span> -->
+              </el-option>
+            </el-select>
+
+            <el-select v-model="detailList.endissueTime" style="width:180px" placeholder="结束时间">
+              <el-option
+                v-for="item in endTime"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+                <span style="float: left">{{ item.label }}</span>
+                <!-- <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span> -->
+              </el-option>
+            </el-select>
+            <span
+              style="margin-left:40px;"
+            >全天候(不包括0{{detailList.startissueTime}}:00～0{{detailList.endissueTime}}:00)</span>
+          </el-form-item>
+          <el-form-item required label="发放红包">
+            <el-input
+              type="number"
+              min="100"
+              style="width: 180px;height:36px;"
+              :placeholder="'不低于'+ advLimits.advertisRestrictVO.minissueSingle +'个'"
+              v-model="detailList.issueSingle"
+            /><span style="margin-left: 10px;">个/天</span>
+          </el-form-item>
         </div>
 
         <div class="fromList">
@@ -208,11 +249,18 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item v-if="isOnlineShop" required label="链接">
+          <el-form-item v-if="detailList.storeType==0" required label="商品链接">
             <el-input
-              style="width: 400px;height:36px;"
-              placeholder="请输入您的商铺链接"
+              style="width: 360px;height:36px;"
+              placeholder="请输入您的商品链接"
               v-model="detailList.url"
+            />
+          </el-form-item>
+          <el-form-item v-if="detailList.storeType==0" label="现金券链接">
+            <el-input
+              style="width: 360px;height:36px;"
+              placeholder="请输入现金券第三方链接"
+              v-model="detailList.couponsUrl"
             />
           </el-form-item>
         </div>
@@ -222,13 +270,23 @@
             <span class="blueNum">5</span>
             <span>广告费</span>
           </div>
-          <el-form-item required label="总金额">
+          <el-form-item v-if="toNewAdvProps.type==0" required label="投放红包">
             <el-input
-              style="width:300px;;"
+              style="width:220px;"
               type="number"
-              :placeholder="'输入广告投放金额,余额:'+detailList.balancePrice+'元'"
+              min="1000"
+              :placeholder="'不低于'+advLimits.advertisRestrictVO.imgPrice"
               v-model="detailList.totalPrice"
-            />
+            /><span style="margin-left: 10px;">个</span>
+          </el-form-item>
+          <el-form-item v-else required label="投放红包">
+            <el-input
+              style="width:220px;"
+              type="number"
+              min="1000"
+              :placeholder="'不低于'+advLimits.advertisRestrictVO.videoPrice"
+              v-model="detailList.totalPrice"
+            /><span style="margin-left: 10px;">个</span>
           </el-form-item>
           <div style="margin-bottom:120px;"></div>
         </div>
@@ -236,7 +294,7 @@
     </div>
     <div class="footer">
       <div class="btns">
-        <el-button @click="saveAdv" v-loading="loading" :disabled="loading" class="leftBtn">提交并发布</el-button>
+        <el-button @click="saveAdv" class="leftBtn">提交并发布</el-button>
 
         <el-button @click="saveDraft">存为草稿</el-button>
       </div>
@@ -248,10 +306,13 @@
 import { advDetail, advLimit, releaseAdv, editAdv } from "../network/adv.js";
 import goodsEditUpload from "../comUpload/goodsEditUpload";
 import { getCitys } from "../network/common.js";
+import uploadVod from "../comUpload/uploadVod"
+import { Loading } from "element-ui";
 
 export default {
   components: {
-    goodsEditUpload
+    goodsEditUpload,
+    uploadVod
   },
   props: {
     toNewAdvProps: {
@@ -308,21 +369,73 @@ export default {
       active: false,
       cityes: [],
       radioAge: 0,
-      advLimits: "",
-
-      loading: false,
+      advLimits: {advertisRestrictVO:{minissueSingle:''}},
+      loading: '',
       isOnlineShop: false,
-      videoFristImg: ""
+      videoFristImg: "",
+      startTime: [
+        { value: "5", label: "5:00" },
+        { value: "6", label: "6:00" },
+        { value: "7", label: "7:00" },
+        { value: "8", label: "8:00" },
+        { value: "9", label: "9:00" },
+        { value: "10", label: "10:00" },
+        { value: "11", label: "11:00" },
+        { value: "12", label: "12:00" },
+        { value: "13", label: "13:00" },
+        { value: "14", label: "14:00" },
+        { value: "15", label: "15:00" },
+        { value: "16", label: "16:00" },
+        { value: "17", label: "17:00" },
+        { value: "18", label: "18:00" },
+        { value: "19", label: "19:00" },
+        { value: "20", label: "20:00" },
+        { value: "21", label: "21:00" },
+        { value: "22", label: "22:00" },
+        { value: "23", label: "23:00" },
+        { value: "0", label: "0:00" },
+        { value: "1", label: "1:00" },
+        { value: "2", label: "2:00" }
+      ],
+      endTime: [
+        { value: "6", label: "6:00" },
+        { value: "7", label: "7:00" },
+        { value: "8", label: "8:00" },
+        { value: "9", label: "9:00" },
+        { value: "10", label: "10:00" },
+        { value: "11", label: "11:00" },
+        { value: "12", label: "12:00" },
+        { value: "13", label: "13:00" },
+        { value: "14", label: "14:00" },
+        { value: "15", label: "15:00" },
+        { value: "16", label: "16:00" },
+        { value: "17", label: "17:00" },
+        { value: "18", label: "18:00" },
+        { value: "19", label: "19:00" },
+        { value: "20", label: "20:00" },
+        { value: "21", label: "21:00" },
+        { value: "22", label: "22:00" },
+        { value: "23", label: "23:00" },
+        { value: "0", label: "0:00" },
+        { value: "1", label: "1:00" },
+        { value: "2", label: "2:00" }
+      ],
     };
   },
+  computed: {
+
+  },
   methods: {
+    //删除视频
+    deleVideo() {
+      this.detailList.video = '';
+      console.log('delvideo')
+    },
     //视频上传得到URL
     getMyEvent(vid) {
       this.detailList.video = vid.url;
-
-      console.log(vid);
       this.detailList.second = vid.duration;
-      this.detailList.videoFrame = vid.firstImg;
+      this.detailList.videoFrame = vid.firstImg.name;
     },
     //输入框数据及时更新
     change(e) {
@@ -333,9 +446,9 @@ export default {
       console.log(val);
       let shop = this.advLimits.storeVOS.find(item => item.storeId == val);
       if (shop.type == 0) {
-        this.isOnlineShop = true;
+        this.detailList.storeType = 0;
       } else {
-        this.isOnlineShop = false;
+        this.detailList.storeType = 1;
       }
     },
     //提交前图片处理
@@ -496,12 +609,11 @@ export default {
         background: "rgba(0, 0, 0, 0.7)"
       });
 
-      if (this.detailList.type == 0 || this.detailList.type == 2) {
-        //上传图片，拿地址
-      } else {
+      if (this.detailList.type == 1 || this.detailList.type == 3 && !this.detailList.video) {
         //上传视频，拿地址
+        // console.log('上传视频')
         this.$refs.childVod.authUpload();
-      }
+      } 
       //梳理城市数据
       let districtValidVOS = [];
       this.detailList.disList.forEach(item => {
@@ -524,7 +636,7 @@ export default {
       this.detailList.districtValidVOS = districtValidVOS.filter(
         item => item.disPid
       );
-      console.log(this.detailList.districtValidVOS);
+      // console.log(this.detailList.districtValidVOS);
 
       let that = this;
       let timer = null;
@@ -544,13 +656,13 @@ export default {
             this.senEditAdv();
           }
         } else {//视频广告
-          console.log(this.detailList.type);
-          console.log("shipin");
+          // console.log(this.detailList.type);
+          // console.log("shipin");
           if (this.detailList.video) {
             clearInterval(timer);
             timer = null;
             this.loading.close(); //关闭加载提示
-            this.senDataToJava();
+            this.senEditAdv();
           }
         }
         if (time >= 30) {
@@ -598,12 +710,13 @@ export default {
       advDetail(data).then(res => {
         if (res.data.code == "0000") {
           let list = res.data.data;
-          console.log(list);
+          // console.log(list);
           //绑定第一层数据
           this.detailList = list;
           //设置视频第一帧
           if (list.videoFrame) {
-            this.videoFristImg = ossUrl + videoFrame;
+            this.videoFristImg = {url: list.ossUrl + list.videoFrame};
+            // console.log(this.videoFristImg)
           }
 
           //设置内容段默认数据
@@ -678,17 +791,6 @@ export default {
       });
     },
 
-    //店铺列表，视频/图文时长，最低发布金额
-    getAdvLimit() {
-      advLimit().then(res => {
-        if (res.data.code == "0000") {
-          this.advLimits = res.data.data;
-          // console.log(this.advLimits);
-        } else {
-          this.$message.error(res.data.msg);
-        }
-      });
-    },
     //提交内容判断并提示
     contentJudgment() {
       if (!this.detailList.title) {
@@ -696,7 +798,7 @@ export default {
           confirmButtonText: "确定",
           callback: action => {}
         });
-        this.loading.close(); //关闭加载提示
+        
         return false;
       }
       if (!this.detailList.tags.length) {
@@ -704,7 +806,7 @@ export default {
           confirmButtonText: "确定",
           callback: action => {}
         });
-        this.loading.close(); //关闭加载提示
+        
         return false;
       }
       if (!this.detailList.storeId) {
@@ -712,38 +814,50 @@ export default {
           confirmButtonText: "确定",
           callback: action => {}
         });
-        this.loading.close(); //关闭加载提示
+        
         return false;
       }
-      if (
-        +this.detailList.issueSingle <
-        +this.advLimits.advertisRestrictVO.minissueSingle
-      ) {
-        this.$alert(
-          "",
-          `发放红包不得低于${this.advLimits.advertisRestrictVO.minissueSingle}个/天`,
-          {
-            confirmButtonText: "确定",
-            callback: action => {}
-          }
-        );
-        this.loading.close(); //关闭加载提示
-        return false;
-      }
+      // if (
+      //   +this.detailList.issueSingle <
+      //   +this.advLimits.advertisRestrictVO.minissueSingle
+      // ) {
+      //   this.$alert(
+      //     "",
+      //     `发放红包不得低于${this.advLimits.advertisRestrictVO.minissueSingle}个/天`,
+      //     {
+      //       confirmButtonText: "确定",
+      //       callback: action => {}
+      //     }
+      //   );
+       
+      //   return false;
+      // }
       if (+this.detailList.issueSingle > +this.detailList.totalPrice) {
         this.$alert("", "每天发放红包数量不得大于投放红包总数", {
           confirmButtonText: "确定",
           callback: action => {}
         });
-        this.loading.close(); //关闭加载提示
+        
         return false;
       }
       return true;
-    }
+    },
+     //店铺列表，视频/图文时长，最低发布金额
+    getAdvLimit() {
+      advLimit().then(res => {
+        if (res.data.code == "0000") {
+          this.advLimits = res.data.data;
+          console.log(this.advLimits);
+          // this.detailList.startissueTime = this.advLimits.advertisRestrictVO.startissueTime.toString();
+          // this.detailList.endissueTime = this.advLimits.advertisRestrictVO.endissueTime.toString();
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
+    },
   },
   created() {
     // 获取城市
-
     let citys = JSON.parse(localStorage.getItem("citys"));
     this.citys = citys;
     // console.log(citys)
@@ -755,6 +869,7 @@ export default {
       let id = { advId: this.toNewAdvProps.advId };
       this.getAdvDetail(id);
     }
+    
   },
   computed: {
     isShowImgOrVidio() {
@@ -803,7 +918,7 @@ export default {
   width: 160px;
   height: 40px;
   background: rgba(242, 245, 250, 1);
-  color: var(--color-tint);
+  color: #ffa800;
 }
 
 .upload >>> .el-upload--picture-card {
@@ -840,7 +955,7 @@ export default {
   margin: 30px 0;
 }
 .fromTitle .blueNum {
-  color: var(--color-tint);
+  color: #ffa800;
   font-size: 28px;
   padding-right: 20px;
 }
@@ -856,10 +971,10 @@ export default {
 }
 .tagsItem {
   margin-right: 30px;
-  color: var(--color-tint);
+  color: #ffa800;
   font-size: 16px;
   background-color: #fff;
-  border: 1px dashed var(--color-tint);
+  border: 1px dashed #ffa800;
 }
 .footer {
   width: 100%;
@@ -878,7 +993,7 @@ export default {
 .footer .leftBtn {
   margin-right: 40px;
   color: #fff;
-  background-color: var(--color-tint);
+  background-color: #ffa800;
   border: none;
 }
 .citys {
@@ -901,14 +1016,14 @@ export default {
   text-overflow: ellipsis;
 }
 .cityList.active {
-  border: 1px dashed #005bea;
-  color: var(--color-tint);
+  border: 1px dashed #ffa800;
+  color: #ffa800;
 }
 .cityBtns1 {
   width: 100px;
   height: 36px;
-  border: 1px solid var(--color-tint);
-  color: var(--color-tint);
+  border: 1px solid #ffa800;
+  color: #ffa800;
   line-height: 10px;
   margin-right: 10px;
 }
@@ -917,13 +1032,13 @@ export default {
   height: 36px;
   line-height: 10px;
   color: #fff;
-  background-color: var(--color-tint);
+  background-color: #ffa800;
   border: none;
 }
 .addShopBtn {
   margin-top: 30px;
   background-color: #e6e6e6;
-  color: var(--color-tint);
+  color: #ffa800;
   font-size: 14px;
   border: none;
   box-sizing: border-box;
@@ -936,7 +1051,7 @@ export default {
   top: 6px;
   right: -65px;
   font-size: 16px;
-  color: var(--color-tint);
+  color: #ffa800;
   border: none;
 }
 .explain {

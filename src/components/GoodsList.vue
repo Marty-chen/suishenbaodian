@@ -29,24 +29,35 @@
       <el-table-column align="center" prop="createDate" label="创建时间"></el-table-column>
       <el-table-column align="center" fixed="right" label="操作" width="200">
         <template scope="scope">
-          <img
+          <el-tooltip content="查看商品详情" placement="bottom" effect="light">
+             <img
             class="editBtn"
             @click="handleDetails(scope.$index, scope.row)"
             src="../assets/img/see.png"
             alt
           />
+          </el-tooltip>
+         
+          <!-- 复制链接 -->
+          <el-tooltip content="复制商品链接" placement="bottom" effect="light">
+          <img class="editBtn" @click="copyLink(scope.row)" src="../assets/img/copyLink.png" alt />
+          </el-tooltip>
+          <el-tooltip content="商品信息编辑" placement="bottom" effect="light">
           <img
             class="editBtn"
             @click="handleEdit(scope.$index, scope.row)"
             src="../assets/img/edit_icon.png"
             alt
           />
+          </el-tooltip>
+          <el-tooltip content="商品删除" placement="bottom" effect="light">
           <img
-          class="editBtn"
+            class="editBtn"
             @click="handleDelete(scope.$index, scope.row)"
             src="../assets/img/delete_icon.png"
             alt
           />
+          </el-tooltip>
         </template>
       </el-table-column>
     </el-table>
@@ -64,13 +75,18 @@
       <!-- 插入蒙层内容组件 -->
       <seeGoods v-if="showComp==3" slot="container" :goodsId="goodsId" />
       <newGoods v-if="showComp==1" slot="container" @closeMongolia="closeMongolia" />
-      <editGoods v-if="showComp==2" slot="container" :goodsId="goodsId" @closeMongolia="closeMongolia"/>
+      <editGoods
+        v-if="showComp==2"
+        slot="container"
+        :goodsId="goodsId"
+        @closeMongolia="closeMongolia"
+      />
     </Mongolia>
   </div>
 </template>
 
 <script>
-import { goodsList,goodsDel } from "../network/goods.js";
+import { goodsList, goodsDel } from "../network/goods.js";
 
 import Mongolia from "../common/Mongolia";
 import seeGoods from "../common/seeGoods";
@@ -91,11 +107,24 @@ export default {
       tableData: [],
       deleGoodsList: [],
       deleIndex: [],
-      goodsId: ""
+      goodsId: "",
+      link: "https://www.myeverytimes.com"
     };
   },
-  
+
   methods: {
+    //复制链接
+    copyLink(val) {
+      let message = this.link + "?gdsId=" + val.gdsId;
+      this.$copyText(message)
+        .then(res => {
+          this.$message.success("链接已复制到剪切板！快去发广告吧！");
+        })
+        .catch(err => {
+          this.$message.error("复制失败，请刷新页面重新复制！");
+        });
+    },
+
     //查看详情
     handleDetails(index, row) {
       // console.log(row)
@@ -178,7 +207,7 @@ export default {
     closeMongolia() {
       this.isShowMongolia = false;
       this.goodsIdId = "";
-      this.showComp = '';
+      this.showComp = "";
       // 刷新数据
       this.getGoodsList();
     },
@@ -195,23 +224,22 @@ export default {
         current: current
       };
       goodsList(data).then(res => {
-
-        if(res.data.code=='0000') {
+        if (res.data.code == "0000") {
           this.goodsData = res.data.data;
-        // console.log(res)
-        let records = [];
-        res.data.data.records.forEach(item => {
-          records.push({
-            createDate: item.createDate,
-            gdsId: item.gdsId,
-            img1: item.img1,
-            title: item.title,
-            userId: item.userId,
-            price: item.minPrice + "-" + item.maxPrice
+          // console.log(res)
+          let records = [];
+          res.data.data.records.forEach(item => {
+            records.push({
+              createDate: item.createDate,
+              gdsId: item.gdsId,
+              img1: item.img1,
+              title: item.title,
+              userId: item.userId,
+              price: item.minPrice + "-" + item.maxPrice
+            });
           });
-        });
-        this.tableData = records;
-        }else{
+          this.tableData = records;
+        } else {
           this.$message.error(res.data.msg);
         }
       });
@@ -241,7 +269,6 @@ export default {
     }
   },
   created() {
-    
     this.getGoodsList(1);
   },
   computed: {
@@ -253,18 +280,21 @@ export default {
 </script>
 
 <style scoped>
+.wrap {
+  min-width: 1000px
+}
 .el-table {
   font-size: 18px;
   color: #666;
   border-radius: 10px;
 }
-.el-table>>>thead {
+.el-table >>> thead {
   color: #333;
 }
-.el-table>>>th {
+.el-table >>> th {
   font-weight: 400;
   font-size: 18px;
-  background-color: #E6E6E6;
+  background-color: #e6e6e6;
 }
 .tab {
   width: 100%;
@@ -281,7 +311,7 @@ export default {
   margin-right: 50px;
   padding: 0 30px 20px 0;
   box-sizing: border-box;
-  color:#999;
+  color: #999;
 }
 .tabCircle {
   margin-right: 10px;
@@ -290,11 +320,11 @@ export default {
   vertical-align: middle;
 }
 .active .tabCircle {
-  color: #FFA800;
+  color: #ffa800;
 }
 .active {
-  border-bottom: 3px solid #FFA800;
-  color: #FFA800;
+  border-bottom: 3px solid #ffa800;
+  color: #ffa800;
 }
 .seleImg {
   display: inline-block;

@@ -39,14 +39,13 @@
       <el-table-column align="center" label="视频/图片">
         <template scope="scope">
           <div v-if="scope.row.masterImg" class="seleImg">
-            
             <el-image style="width: 60px; height: 60px;" :src="scope.row.masterImg" fit="cover" />
             <div v-if="scope.row.putaway==0" class="off">
               <div>已下架</div>
             </div>
           </div>
           <div v-if="scope.row.videoFrame" class="seleImg">
-            <img :src="scope.row.videoFrame" />
+            <el-image style="width: 60px; height: 60px;" fit="cover" :src="scope.row.videoFrame" />
             <div v-if="scope.row.putaway==0" class="off">
               <div>已下架</div>
             </div>
@@ -61,30 +60,42 @@
       <el-table-column align="center" fixed="right" label="操作" width="230">
         <template scope="scope">
           <div class="ctrlImg">
-            <img
-              v-if="currentIndex != 2 && scope.row.putaway==0"
-              @click="handleUpload(scope.$index, scope.row)"
-              src="../assets/img/upload_icon.png"
-              alt
-            />
-            <img
+            <el-tooltip content="上架广告" placement="bottom" effect="light">
+              <img
+                v-if="currentIndex != 2 && scope.row.putaway==0"
+                @click="handleUpload(scope.$index, scope.row)"
+                src="../assets/img/upload_icon.png"
+                alt
+              />
+            </el-tooltip>
+            <el-tooltip content="编辑广告" placement="bottom" effect="light">
+              <img
               v-if="scope.row.putaway==0"
               @click="handleEdit(scope.$index, scope.row)"
               src="../assets/img/edit_icon.png"
               alt
             />
-            <img
+            </el-tooltip>
+            <el-tooltip content="删除广告" placement="bottom" effect="light">
+              <img
               v-if="scope.row.putaway==0"
               @click="handleDelete(scope.$index, scope.row)"
               src="../assets/img/delete_icon.png"
               alt
             />
-            <img
+            </el-tooltip>
+            <el-tooltip content="查看广告" placement="bottom" effect="light">
+              <img
               v-if="currentIndex != 2"
               @click="handleDetails(scope.$index, scope.row)"
               src="../assets/img/see.png"
               alt
             />
+            </el-tooltip>
+
+            
+            
+            
           </div>
         </template>
       </el-table-column>
@@ -109,12 +120,13 @@
         slot="container"
         :toNewAdvProps="toNewAdvProps"
       />
-      <editAdv v-if="isShowDetails==1"
+      <editAdv
+        v-if="isShowDetails==1"
         @closeClick="closeMongolia"
         slot="container"
-        :toNewAdvProps="toNewAdvProps" />
+        :toNewAdvProps="toNewAdvProps"
+      />
       <seeAdvDetails v-if="isShowDetails==2" :toDetailsId="toDetailsId" slot="container" />
-      
     </Mongolia>
   </div>
 </template>
@@ -141,7 +153,7 @@ export default {
       tabCtrl: ["图文发布", "短视频发布", "草稿箱"],
       currentIndex: 0,
       isShowMongolia: false,
-      isShowDetails: '',
+      isShowDetails: "",
       advList: "",
       tableData: [],
       deleIndex: [],
@@ -224,7 +236,7 @@ export default {
     //关闭蒙层
     closeMongolia() {
       this.isShowMongolia = false;
-      this.isShowDetails = '';
+      this.isShowDetails = "";
       this.getAdvList();
     },
     //删除当前单个
@@ -275,7 +287,7 @@ export default {
     },
     /**************网络请求函数************* */
     //请求广告列表
-    getAdvList(current=1) {
+    getAdvList(current = 1) {
       let data = {
         size: 5,
         current: current,
@@ -337,28 +349,26 @@ export default {
       });
     },
 
-      //获取城市列表信息
+    //获取城市列表信息
     handleGetCitys() {
       getCitys().then(res => {
         if (res.data.code == "0000") {
-         
-        localStorage.setItem("citys", JSON.stringify(res.data.data));
+          localStorage.setItem("citys", JSON.stringify(res.data.data));
 
           // console.log(citys);
         } else {
           this.$message.error(res.data.msg);
         }
       });
-    },
+    }
   },
   created() {
     this.getAdvList();
     //获取城市信息
-    let citys = JSON.parse(localStorage.getItem("citys")) ;
+    let citys = JSON.parse(localStorage.getItem("citys"));
     if (!citys) {
-      this.handleGetCitys()
+      this.handleGetCitys();
     }
-    
   },
   computed: {
     pageNum() {
@@ -369,18 +379,21 @@ export default {
 </script>
 
 <style scoped>
+.wrap {
+  min-width: 900px;
+}
 .el-table {
   font-size: 18px;
   color: #666;
   border-radius: 10px;
 }
-.el-table>>>thead {
+.el-table >>> thead {
   color: #333;
 }
-.el-table>>>th {
+.el-table >>> th {
   font-weight: 400;
   font-size: 18px;
-  background-color: #E6E6E6;
+  background-color: #e6e6e6;
 }
 .tab {
   width: 100%;
@@ -397,20 +410,20 @@ export default {
   margin-right: 50px;
   padding: 0 30px 20px 0;
   box-sizing: border-box;
-  color:#999;
+  color: #999;
 }
 .tabCircle {
   margin-right: 10px;
   font-size: 14px;
-  color: #999;
+  color: rgba(0,0,0,0);
   vertical-align: middle;
 }
 .active .tabCircle {
-  color: #FFA800;
+  color: #ffa800;
 }
 .active {
-  border-bottom: 3px solid #FFA800;
-  color: #FFA800;
+  border-bottom: 3px solid #ffa800;
+  color: #ffa800;
 }
 .seleImg {
   display: inline-block;

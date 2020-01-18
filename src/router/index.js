@@ -90,14 +90,13 @@ const routes = [
     }
   },
   {
-    path: '/wallet/sucess',
-    name: 'aliPay',
-    component: ()=>import('../views/aliPay.vue'),
+    path: '/wallet/payResult',
+    name: 'payResult',
+    component: ()=>import('../views/payResult.vue'),
     meta: {
       isLogin: true
     }
-  },
-  
+  }
   
 ]
 

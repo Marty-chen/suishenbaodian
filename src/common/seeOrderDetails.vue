@@ -81,7 +81,7 @@
           </el-form-item>
         </div>
 
-        <div class="fromList" style="border:none;">
+        <!-- <div class="fromList" style="border:none;">
           <div class="fromTitle">
             <span class="blueNum">5</span>
             <span>退款信息</span>
@@ -99,7 +99,7 @@
             <div class="font18"></div>
           </el-form-item>
           <div style="margin-bottom:60px;"></div>
-        </div>
+        </div> -->
       </el-form>
     </div>
     <div style="margin-bottom:100px;"></div>

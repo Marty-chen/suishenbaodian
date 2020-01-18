@@ -37,3 +37,12 @@ export function logout() {
     method: 'POST',
   })
 }
+
+//微信快速登陆
+export function wechatLogin(data) {
+  return axios({
+    url: '/api/wechatLogin.pub',
+    method: 'POST',
+    data: data
+  })
+}

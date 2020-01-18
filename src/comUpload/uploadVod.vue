@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="upload">
-      <div class="filebox" v-if="!videoFristImg">
+      <div class="filebox" v-if="!videoFristImg.url">
         <input type="file" @change="fileChange($event)" class="filebtn" />
         <div class="flletit">
           <img src="../assets/img/upload_video_icon.png" alt />
@@ -25,10 +25,10 @@
         >开始上传</el-button>
       </div>-->
     </div>
-    <div v-if="videoFristImg" class="prewVideo">
+    <div v-if="videoFristImg.url" class="prewVideo">
       <!-- <video width="88px" :src="videoLocalUrl"></video> -->
-      <img :src="videoFristImg" alt />
-      <!-- <img :src="blobUrl" alt=""> -->
+      <img :src="videoFristImg.url" alt />
+      
       <div @click="dialogVisible=true" class="playImg">
         <img src="../assets/img/ss_icon_pause@2x.png" alt />
       </div>
@@ -74,15 +74,12 @@ export default {
       videoLocalUrl: "",
       videoUrl: "",
       duration: 0, //视频时长
-      // videoFristImg: "", //视频第一帧
+      // videoFristImg: '', //视频第一帧
       blobUrl: ""
     };
   },
-  props:{
-    videoFristImg: {
-      type: String
-    }
-  },
+  props: ["videoFristImg"],//视频第一帧
+  
   methods: {
     //关闭视频预览
     handleClose(done) {
@@ -90,7 +87,9 @@ export default {
     },
     //删除选中的视频
     deleVideo() {
-      this.videoLocalUrl = "";
+      this.$emit('deleVideo','55')
+      this.videoFristImg.url = "";
+      
     },
     emitEventVod() {
       this.authProgress = 0;
@@ -192,7 +191,7 @@ export default {
             );
             let vidioData = { fileName: uploadInfo.file.name };
             uploadVideo(vidioData).then(res => {
-              console.log(res);
+              // console.log(res);
               if (res.data.code != "0000") {
                 return self.$message.error(res.data.msg);
               }
@@ -233,10 +232,10 @@ export default {
         // 文件上传成功
         onUploadSucceed: function(uploadInfo) {
           self.statusText = "文件上传成功!";
-          this.videoUrl = uploadInfo.object;
+          self.videoUrl = uploadInfo.object;
 
-          this.uploadFristImg() ;//执行上传第一帧图片
-          console.log(uploadInfo);
+          self.uploadFristImg() ;//执行上传第一帧图片
+          console.log(self.videoUrl);
           // this.videoLocalUrl = uploadInfo.bucket + uploadInfo.endpoint.replace(/https:\/\//,'.') + uploadInfo.object
         },
         // 文件上传失败
@@ -355,8 +354,8 @@ export default {
             .getContext("2d")
             .drawImage(video, 0, 0, canvas.width, canvas.height);
           let src = canvas.toDataURL("image/jpg"); //得到第一帧图片的base64
-          this.videoFristImg = src;
-          console.log(this.videoFristImg);
+          this.videoFristImg.url = src;
+          // console.log(this.videoFristImg);
           // 转码添加
           // var img = document.createElement("img");
           // img.src = src;
@@ -394,38 +393,40 @@ export default {
     /****************拿到blob上传到OSS*********************** */
     uploadFristImg() {
       /***blob转换 blobUrl路径************* */
-      let blob = this.dataURLtoBlob(this.videoFristImg); // 传入base64字符串
-      let blobUrl = window.URL.createObjectURL(blob);
-      // console.log(this.blobUrl)
+      let blob = this.dataURLtoBlob(this.videoFristImg.url); // 传入base64字符串
+      // let blobUrl = window.URL.createObjectURL(blob);
+      // console.log(blob)
+      // console.log(blobUrl)
 
       let data1 = { type: 3 };
       STS(data1).then(res => {
         if (res.data.code == "0000") {
           let dataObj = res.data.data; //接口返回配置参数
-          this.Upload(blobUrl, dataObj);
+          this.Upload(blob, dataObj);
         } else {
           this.$message.error(res.data.msg);
         }
       });
     },
-
     // http-request属性来覆盖默认的上传行为（即action="url"），自定义上传的实现
     Upload(file, dataObj) {
       const that = this;
       async function multipartUpload() {
-        let temporary = file.file.name.lastIndexOf(".");
-        let fileNameLength = file.file.name.length;
-        let fileFormat = file.file.name.substring(
-          temporary + 1,
-          fileNameLength
-        );
-        let fileName = getFileNameUUID() + "." + fileFormat;
+        // let temporary = file.file.name.lastIndexOf(".");
+        // let fileNameLength = file.file.name.length;
+        // let fileFormat = file.file.name.substring(
+        //   temporary + 1,
+        //   fileNameLength
+        // );
+        // let fileName = getFileNameUUID() + "." + fileFormat;
+        let fileName = getFileNameUUID();
         client(dataObj)
-          .multipartUpload(`${dataObj.url}${fileName}`, file.file, {})
+          .multipartUpload(`${dataObj.url}${fileName}`, file, {})
           .then(result => {
             //上传成功返回值，可针对项目需求写其他逻辑
-            // console.log(result);
+            console.log(result);
             let senData = { url: that.videoUrl, duration: that.duration, firstImg: result };
+            console.log(senData)
             that.emitEvent(senData);
           })
           .catch(err => {

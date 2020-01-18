@@ -26,18 +26,19 @@
         <template scope="scope">
           <!-- v-if="scope.row.status=='待发货'" -->
           <img
+            v-if="scope.row.status=='待发货'"
             class="editBtn"
             @click="handleDelive_goods(scope.$index, scope.row)"
             src="../assets/img/delive_goods_icon.png"
             alt
           />
-          <img class="editBtn" src="../assets/img/refund_reject_icon.png" alt />
-          <img
+          <!-- <img class="editBtn" src="../assets/img/refund_reject_icon.png" alt /> -->
+          <!-- <img
             class="editBtn"
             @click="handleRefund(scope.$index, scope.row)"
             src="../assets/img/refund_agree_icon.png"
             alt
-          />
+          /> -->
           <img
             class="editBtn"
             @click="handleToSeeOrderDetail(scope.$index, scope.row)"
@@ -60,7 +61,8 @@
     <Mongolia v-if="isShowMongolia" @closeMongolia="closeMongolia">
       <!-- 插入蒙层内容组件 -->
       <seeOrderDetails v-if="seeOrderDetails" :orderId="orderId" slot="container" />
-      <Logistics v-else slot="logistics" @closeClick="closeMongolia" />
+      <Logistics v-else :logisticsOrderId="logisticsOrderId" slot="logistics"  @closeClick="closeMongolia"/>
+
     </Mongolia>
   </div>
 </template>
@@ -80,6 +82,7 @@ export default {
   },
   data() {
     return {
+      logisticsOrderId: '',
       orderId: "",
       seeOrderDetails: false,
       chooseValue: "",
@@ -135,6 +138,7 @@ export default {
         confirmButtonClass: "confirmBtn"
       })
         .then(() => {
+          this.logisticsOrderId = row.orderId;
           this.isShowMongolia = true;
         })
         .catch(() => {});
@@ -213,6 +217,9 @@ export default {
 </script>
 
 <style scoped>
+.wrap {
+  min-width: 920px
+}
 .el-table {
   font-size: 16px;
   color: #666;

@@ -10,11 +10,19 @@
         </div>
         <div class="content">
           <el-form-item required label="物流单号">
-            <el-input style="width:400px;" placeholder="请输入物流单号" v-model="logisticsNum" />
+            <el-input
+              style="width:400px;"
+              placeholder="请输入物流单号"
+              v-model="logisticsCode"
+            />
           </el-form-item>
 
           <el-form-item label="物流公司">
-            <el-input style="width:400px;" placeholder="请输入物流公司名称" v-model="company" />
+            <el-input
+              style="width:400px;"
+              placeholder="请输入物流公司名称"
+              v-model="logisticsCompany"
+            />
           </el-form-item>
         </div>
 
@@ -23,26 +31,51 @@
     </div>
     <div class="footer">
       <div class="btns">
-        <el-button @click="btnClick" :loading="loading" :disabled="!logisticsNum" class="leftBtn" type="primary">确定并发货</el-button>
+        <el-button
+          @click="btnClick"
+          :loading="loading"
+          :disabled="!logisticsCode && !logisticsCompany"
+          class="leftBtn"
+          type="primary"
+          >确定并发货</el-button
+        >
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { ship } from "../network/order.js";
 export default {
   data() {
     return {
-      logisticsNum: "",
-      company: "",
+      logisticsCode: "",
+      logisticsCompany: "",
       loading: false
     };
   },
+  props: ["logisticsOrderId"],
   methods: {
     btnClick() {
       this.loading = true;
-        // this.$emit('closeClick','')
-
+      // this.$emit('closeClick','')
+      let shipData = {
+        orderId: this.logisticsOrderId,
+        logisticsCode: this.logisticsCode,
+        logisticsCompany: this.logisticsCompany
+      };
+      ship(shipData).then(res => {
+        console.log(res);
+        if (res.data.code == "0000") {
+          this.$message({
+            message: "提交成功！",
+            type: "success"
+          });
+          this.$emit("closeClick", "");
+        } else {
+          this.$message.error(res.data.msg);
+        }
+      });
     }
   }
 };
@@ -79,7 +112,6 @@ export default {
   width: 600px;
   margin: 0 auto;
 }
-
 
 .footer {
   width: 100%;

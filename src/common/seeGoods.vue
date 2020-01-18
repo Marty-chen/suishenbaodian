@@ -271,7 +271,7 @@ export default {
   margin: 30px 0;
 }
 .fromTitle .blueNum {
-  color: var(--color-tint);
+  color: #ffa800;
   font-size: 28px;
   padding-right: 20px;
 }

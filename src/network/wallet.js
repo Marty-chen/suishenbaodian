@@ -42,7 +42,7 @@ export function weChatOrderIsPc(data,header) {
   return axios({
     url: '/api/wx/unifiedorder',
     method: 'POST',
-    responseType: 'arraybuffer',
+    // responseType: 'arraybuffer',
     data: data,
     header: header
   })
@@ -57,11 +57,31 @@ export function bindAlipay(data) {
   })
 }
 
-//支付宝绑定
+//微信绑定
 export function bindWechat(data) {
   return axios({
     url: '/api/user/bindWechat',
     method: 'POST',
     data: data
+  })
+}
+
+
+//支付宝提现
+export function alipayTransfer(data,header) {
+  return axios({
+    url: '/api/alipay/alipayTransfer',
+    method: 'POST',
+    data: data,
+    header: header
+  })
+}
+
+//交易查询
+export function dealStatus(data) {
+  return axios({
+    url: '/api/business/status',
+    method: 'GET',
+    params: data
   })
 }

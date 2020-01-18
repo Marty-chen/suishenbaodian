@@ -7,26 +7,30 @@
       </div>
       <div style="float: right; font-size:20px">
         <span style="padding-right:10px; font-size:16px;">
-          <span style="color:#FFA800;font-size:18px;">{{nickName}},</span> 你好！
+          <span style="color:#FFA800;font-size:18px;">{{ nickName }}</span>
+          ，你好！
         </span>
         <!-- <i class="el-icon-platform-eleme" style="padding-right: 30px; color:#126ECB;"></i> -->
-        <el-button @click="signOut" size="small" style="margin: 0 20px 0 20px;color:#fff;background-color: #FFA800;border:none;" >退出</el-button>
+        <el-button
+          @click="signOut"
+          size="small"
+          style="margin: 0 20px 0 20px;color:#fff;background-color: #FFA800;border:none;"
+          >安全退出</el-button
+        >
       </div>
     </el-header>
   </el-container>
 </template>
 
 <script>
-import { logout } from '../network/login.js'
+import { logout } from "../network/login.js";
 export default {
   data() {
     return {
       userInfo: ""
     };
   },
-  created() {
-    
-  },
+  created() {},
   computed: {
     nickName() {
       return this.$store.state.userInfo.nickName;
@@ -44,17 +48,15 @@ export default {
           localStorage.removeItem("Flag");
           localStorage.removeItem("userInfo");
           localStorage.removeItem("menuList");
-          this.$store.commit("saveMenuList",[]);
-          this.$store.commit("saveUserInfo", {});
-        this.$message({
+          this.$message({
             type: "success",
             message: "退出成功!"
           });
           this.$router.push({
-            path: "/login"
+            path: "/"
           });
+          this.ctrlLogout();
           
-          this.ctrlLogout()
           
         })
         .catch(() => {
@@ -66,15 +68,15 @@ export default {
     },
     //告诉后台退出登录了
     ctrlLogout() {
-      logout().then(res=>{
-        console.log(res)
-         
-      })
+      logout().then(res => {
+        this.$store.commit("saveMenuList", []);
+          this.$store.commit("saveUserInfo", {});
+        console.log(res);
+      });
     }
   }
 };
 </script>
-
 
 <style scoped>
 .logo {

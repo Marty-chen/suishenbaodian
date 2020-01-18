@@ -28,8 +28,6 @@
               支付金额：
               <el-input
                   type="number"
-                  @focus="focus"
-                  @blur="blur"
                   style="width:300px;height:36px;margin-left: 10px;"
                   placeholder="请输入提现金额"
                   v-model="inputValue"
@@ -40,28 +38,28 @@
                 提示：每天只能提现一次          
               </div>
             <div>
-              <el-button @click="toStep2" class="payBtn">开始提现</el-button>
+              <el-button @click="toStep2" :disabled="!inputValue" class="payBtn">开始提现</el-button>
             </div>
           </div>
 
           <div v-if="stepStatus==2" class="step2">
             <div class="moneyInfo">
               提现金额
-              <span>￥{{money}}</span>
+              <span>￥{{inputValue}}</span> &nbsp;元
               <div class="explain" style="color:#666;margin-top:30px">
                 订单已于
-                <span style="color:#333; fontSize:18px;margin:0;">2019-12-10 15:21:46</span> 提交成功！| 订单号：468688906178683581
+                <span style="color:#333; fontSize:18px;margin:0;">{{nowDate}}</span> 生成！| 请选择提现方式。
               </div>
             </div>
             <div class="payment">
               <div class="paymentLeft">提现方式</div>
               <div class="payChoice">
-                <div class="paymentMethod" :class="{active:radio==1}">
+                <!-- <div class="paymentMethod" :class="{active:radio==1}">
                   <el-radio class="radio" v-model="radio" label="1">
                     <img src="../assets/img/wechat_icon.png" />
                     <span>微信支付</span>
                   </el-radio>
-                </div>
+                </div> -->
                 <div class="paymentMethod" :class="{active:radio==2}">
                   <el-radio class="radio" v-model="radio" label="2">
                     <img src="../assets/img/pay_treasure_icon.png" />
@@ -90,6 +88,9 @@
 
 <script>
 import elHeader from "../components/elHeader";
+import { alipayTransfer } from "../network/wallet.js";
+import { dateFormat } from "../util/dateFormat.js"
+
 
 export default {
   components: {
@@ -97,42 +98,45 @@ export default {
   },
   data() {
     return {
-      radio: "1",
+      paymentData:'',
+      radio: "2",
       stepStatus: 1,
-      money: 1000,
-      moneyList: ["1000", "2000", "3000", "4000", "5000", "6000"],
       inputValue: "",
       currentIndex: 0
     };
   },
   methods: {
-    //退出充值
+    //退出提现
     toHome(i) {
-      // console.log (this.$route)
-
       this.$router.push({
         path: i
       });
     },
-    //选择金额
-    moneyClick(index) {
-      this.currentIndex = index;
-      this.money = this.moneyList[index];
-    },
-    focus() {
-      this.currentIndex = null;
-    },
-    blur() {
-      if (this.inputValue) {
-        this.money = this.inputValue;
-        this.inputValue = "";
-      }
-    },
+    
     toStep2() {
       this.stepStatus = 2;
     },
     toStep3() {
-      this.stepStatus = 3;
+
+      this.getAlipayTransfer()
+
+      // this.stepStatus = 3;
+    },
+    //支付宝提现
+    getAlipayTransfer() {
+      alipayTransfer().then(res=>{
+        console.log(res)
+        if(res.data.code=="0000") {
+          // this.paymentData = res.data.data;
+        }else{
+          this.$message.error(res.data.msg)
+        }
+      })
+    }
+  },
+  computed: {
+    nowDate() {
+      return dateFormat("YYYY-mm-dd HH:MM",new Date())
     }
   }
 };

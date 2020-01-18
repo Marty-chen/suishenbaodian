@@ -17,3 +17,12 @@ export function orderDetail(id) {
     params: id
   })
 }
+
+//发货
+export function ship(data) {
+  return axios({
+    url: '/api/gds/order/ship',
+    method: 'POST',
+    data: data
+  })
+}

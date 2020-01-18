@@ -34,7 +34,7 @@
             >
               <div class="masterImg">
                 <el-image
-                  style="width: 88px; height: 88px; border-radius: 3px; vertical-align: middle;"
+                  style="width:100%; vertical-align: middle;"
                   :src="detailList.ossUrl+item.advImg"
                   :preview-src-list="srcList2"
                   fit="cover"
@@ -47,14 +47,22 @@
           <div v-else>
             <el-form-item label="视频">
               <div class="masterImg">
-                <!-- <img :src="detailList.ossUrl+detailList.videoFrame" alt /> -->
                 <div class="prewVideo">
-                  <img width="88px" :src="detailList.ossUrl+detailList.videoFrame" />
+                  <img
+                  style="width:100%; vertical-align: middle;"
+                  :src="videoImg"
+                  fit="cover"
+                />
                   <div @click="dialogVisible=true" class="playImg">
                     <img src="../assets/img/ss_icon_pause@2x.png" alt />
                   </div>
                 </div>
-                <el-dialog :visible.sync="dialogVisible" :before-close="handleClose" class="dialog">
+                <el-dialog
+                  :visible.sync="dialogVisible"
+                  :modal="false"
+                  :before-close="handleClose"
+                  class="dialog"
+                >
                   <video :src="detailList.videoUrl+detailList.video" autoplay muted controls loop></video>
                 </el-dialog>
               </div>
@@ -181,7 +189,7 @@ export default {
       advDetail(data).then(res => {
         if (res.data.code == "0000") {
           this.detailList = res.data.data;
-          console.log(this.detailList )
+          // console.log(this.detailList);
           let list = res.data.data;
           this.srcList1.push(list.ossUrl + list.masterImg);
           list.advertisImgVOS.forEach(item => {
@@ -204,6 +212,9 @@ export default {
           return " ";
         }
       }
+    },
+    videoImg() {
+      return this.detailList.ossUrl+this.detailList.videoFrame
     }
   }
 };

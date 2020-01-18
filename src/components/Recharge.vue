@@ -14,7 +14,7 @@
           title=""
           width="250"
           trigger="hover"
-          content="发布红包抽屉说明文案。发布红包抽屉说明文案。。"
+          content="发布红包抽屉说明文案。"
         >
         </el-popover>
           <div v-popover:popover1 class="circle">?</div>
@@ -116,6 +116,9 @@ export default {
 </script>
 
 <style scoped>
+.wrap {
+  min-width: 800px
+}
 .el-table {
   font-size: 16px;
   color: #666;

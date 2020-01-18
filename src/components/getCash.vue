@@ -14,7 +14,7 @@
             title
             width="250"
             trigger="hover"
-            content="发布红包抽屉说明文案。发布红包抽屉说明文案。。"
+            content="货款余额说明文案。"
           ></el-popover>
           <div v-popover:popover1 class="circle">?</div>
         </div>
@@ -25,23 +25,21 @@
     <div class="balance-wrap">
       <div class="balance1">
         <div class="mode">第三方提现方式</div>
-        <div class="wechat">
+        <!-- <div class="wechat">
           <div class="payImg">
             <img src="../assets/img/wechat_icon.png" alt="">微信
           </div>
           <el-button v-if="rechargeTotal.wx==0" @click="bindWech" size="small" class="bingdingBtn1">去绑定</el-button>
           <el-button v-else size="small" class="bingdingBtn2">已绑</el-button>
-        </div>
+        </div> -->
 
         <div class="wechat">
           <div class="payImg">
             <img src="../assets/img/pay_treasure_icon.png" alt="">支付宝
           </div>
-          <el-button v-if="rechargeTotal.alipay==0" @click="bindAli" size="small" class="bingdingBtn1">去绑定</el-button>
+            <el-button v-if="rechargeTotal.alipay==0" @click="bindAli" size="small" class="bingdingBtn1">去绑定</el-button>
           <el-button v-else size="small" class="bingdingBtn2">已绑</el-button>
         </div>
-        
-        
       </div>
     </div>
 
@@ -84,7 +82,8 @@ export default {
   data() {
     return {
       rechargeList: "",
-      rechargeTotal: ""
+      rechargeTotal: "",
+      bindAliUrl:'https://openauth.alipay.com/oauth2/publicAppAuthorize.htm?app_id=2021001102620932&scope=auth_user&redirect_uri=https%3A%2F%2Fwww.baidu.com'
     };
   },
   computed: {
@@ -94,8 +93,30 @@ export default {
   },
   created() {
     this.getWalletList(1);
+    // auth_code
+    //判断url是否有值传过来
+    let urlSearch = this.getRequest();
+    let data = { code: urlSearch.auth_code };
+    // console.log(data);
+    if (data.code) {
+      this.postBindAlipay(data);
+    }
+    
   },
   methods: {
+    //拿url传过来的参数
+    getRequest() {
+      var url = location.search; //获取url中"?"符后的字串
+      var theRequest = new Object();
+      if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        var strs = str.split("&");
+        for (var i = 0; i < strs.length; i++) {
+          theRequest[strs[i].split("=")[0]] = decodeURI(strs[i].split("=")[1]);
+        }
+      }
+      return theRequest;
+    },
     // 去提现去提现
     toGetCash() {
       this.$router.push({ path: "/paymentGoods" });
@@ -108,9 +129,11 @@ export default {
     bindWech() {
 
     },
-    //绑定支付宝
+    //绑定支付宝按钮
     bindAli() {
-
+      //跳转到支付宝受权页面
+      // window.location.href= this.bindAliUrl;
+      window.open(this.bindAliUrl, '_blank').location;
     },
 
     /***网络请求函数 */
@@ -136,6 +159,21 @@ export default {
           this.$message.error(res.data.msg);
         }
       });
+    },
+    // 支付宝绑定
+    postBindAlipay(code) {
+      bindAlipay(code).then(res=>{
+        // console.log(res)
+        if(res.data.code == '0000') {
+          //友好提示
+        this.$message({
+          message: "绑定成功",
+          type: "success"
+        });
+        this.getWalletList(1)
+        }
+        
+      })
     }
   }
 };
@@ -158,7 +196,7 @@ export default {
 .wrapp {
   padding: 40px 20px;
   white-space: nowrap;
-
+  min-width: 900px;
 }
 .balance-wrap {
   display: inline-block;

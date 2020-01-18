@@ -4,7 +4,10 @@ import router from './router'
 import store from './store'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
-
+//复制到粘贴板插件
+import VueClipboard from 'vue-clipboard2'
+// VueClipboard.config.autoSetContainer = true
+Vue.use(VueClipboard)
 
 Vue.use(ElementUI);
 
@@ -27,8 +30,13 @@ router.beforeEach((to, from, next) => {
     //从本地缓存中取出 用户信息赋值到VUEX
     let getUser = JSON.parse(localStorage.getItem("userInfo"));
     let menuList = JSON.parse(localStorage.getItem("menuList"));
-    store.commit("saveMenuList", menuList);
-    store.commit("saveUserInfo", getUser);
+    if(menuList) {
+      store.commit("saveMenuList", menuList);
+    }
+    if(getUser) {
+      store.commit("saveUserInfo", getUser);
+    }
+    
     // console.log(getUser)
 
 
